@@ -1,0 +1,22 @@
+[project]
+name = "autorider"
+version = "0.1.0"
+description = "Automatic overrides"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+ "pydantic>=2.10.6",
+ "pyelftools>=0.31",
+]
+
+[project.scripts]
+autorider = "autorider.cli:main"
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3.4",
+]
+
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
