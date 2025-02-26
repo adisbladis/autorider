@@ -8,7 +8,7 @@ import tomllib
 class OutputConfig(BaseModel):
     build_systems: bool = Field(alias="build-systems", default=True)
     wheel_depends_so: bool = Field(alias="wheel-depends-so", default=True)
-    sdist_depends_so: bool = Field(alias="sdist-depends-so", default=False)
+    sdist_depends_so: bool = Field(alias="sdist-depends-so", default=True)
 
 
 class PackageOutputConfig(BaseModel):
