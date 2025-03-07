@@ -37,7 +37,11 @@ def _make_argparse():
 def main() -> None:
     args = _make_argparse().parse_args()
     subcommand = cast(str, args.subcommand)
-    root = cast(str, args.root)
+    root = Path(cast(str, args.root))
+
+    output_path = Path(cast(str, args.output))
+    if not output_path.is_absolute():
+        output_path = root.joinpath(output_path)
 
     config_path = Path(
         args.config if args.config else os.path.join(root, "pyproject.toml")
@@ -71,7 +75,6 @@ def main() -> None:
     # Lookup soname providers using nix-locate
     so_providers = lookup_sonames(sonames)
 
-    output_path = Path(args.output)
     try:
         os.mkdir(output_path)
     except FileExistsError:
@@ -85,7 +88,7 @@ def main() -> None:
         json.dump(so_providers, fp, indent=2)
         _ = fp.write("\n")
 
-    print(f"Wrote {args.output}")
+    print(f"Wrote {output_path}")
 
     # print(json.dumps(results, indent=2))
     # print(json.dumps(so_providers, indent=2))
