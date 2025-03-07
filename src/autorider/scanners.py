@@ -42,19 +42,34 @@ class Scanner:
 
 class SdistScanner(Scanner):
     build_systems: list[str]
+    build_requires: set[str]
 
     def __init__(self, path: Path) -> None:
         self.build_systems = FALLBACK_SYSTEMS
+        self.build_requires = set()
         super().__init__(path)
 
     @override
     def reader_pred(self, name: str) -> bool:
+        basename = os.path.basename(name)
+
         levels = name.count("/")
-        return (levels == 1) and os.path.basename(name) == "pyproject.toml"
+        if levels == 1 and basename == "pyproject.toml":
+            return True
+
+        if basename == "CMakeLists.txt":
+            return True
+
+        return False
 
     @override
     def reader_cb(self, name: str, fp: IO[bytes]) -> None:
-        self.build_systems = read_build_systems(fp)
+        basename = os.path.basename(name)
+
+        if basename == "pyproject.toml":
+            self.build_systems = read_build_systems(fp)
+        elif basename == "CMakeLists.txt":
+            self.build_requires.add("cmake")
 
 
 class WheelScanner(Scanner):

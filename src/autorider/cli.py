@@ -89,6 +89,3 @@ def main() -> None:
         _ = fp.write("\n")
 
     print(f"Wrote {output_path}")
-
-    # print(json.dumps(results, indent=2))
-    # print(json.dumps(so_providers, indent=2))

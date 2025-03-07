@@ -9,12 +9,14 @@ class OutputConfig(BaseModel):
     build_systems: bool = Field(alias="build-systems", default=True)
     wheel_depends_so: bool = Field(alias="wheel-depends-so", default=True)
     sdist_depends_so: bool = Field(alias="sdist-depends-so", default=True)
+    build_requires: bool = Field(alias="build-requires", default=True)
 
 
 class PackageOutputConfig(BaseModel):
     build_systems: bool | None = Field(alias="build-systems", default=None)
     wheel_depends_so: bool | None = Field(alias="wheel-depends-so", default=None)
     sdist_depends_so: bool | None = Field(alias="sdist-depends-so", default=None)
+    build_requires: bool | None = Field(alias="build-requires", default=True)
 
 
 class AutoriderConfig(BaseModel):

@@ -30,6 +30,8 @@ PackageOutput = TypedDict(
         "sdist-depends-so": NotRequired[list[str]],
         # Build systems as a list of PEP-508 strings
         "build-systems": NotRequired[list[str]],
+        # Native build tooling (nativeBuildInputs)
+        "build-requires": NotRequired[list[str]],
     },
 )
 
@@ -131,6 +133,25 @@ class BuildSystemPostProcessor(PostProcessor):
         output["build-systems"] = build_systems
 
 
+class BuildRequiresPostProcessor(PostProcessor):
+    """
+    Output nativeBuildInputs tooling based on source tree files
+    """
+
+    SCAN_DEPENDS: ClassVar[ScanDepends] = ScanDepends.SDIST
+
+    @override
+    def run(self, output: PackageOutput) -> None:
+        if not self.scan_result.sdist:
+            return
+
+        build_requires = self.scan_result.sdist.build_requires
+        if not build_requires:
+            return
+
+        output["build-requires"] = list(build_requires)
+
+
 def lookup_sonames(sonames: Iterable[str]) -> dict[str, str]:
     ret: dict[str, str] = {}
     with futures.ThreadPoolExecutor() as executor:
@@ -145,10 +166,6 @@ def lookup_sonames(sonames: Iterable[str]) -> dict[str, str]:
 
 
 def process_pkg(config: Config, pkg_scanner: PackageScanner):
-    # pkg_config = config.autorider.packages.get(pkg_scanner.name)
-    # # PackageOutputConfig(**pkg_config, config.autorider.outputs)
-    # print(pkg_config)
-
     output_config = config.autorider.outputs
     pkg_config = config.autorider.packages.get(pkg_scanner.name)
     if pkg_config:
@@ -165,6 +182,8 @@ def process_pkg(config: Config, pkg_scanner: PackageScanner):
         postprocessors.append(WheelDependsPostProcessor)
     if output_config.sdist_depends_so:
         postprocessors.append(SdistDependsPostProcessor)
+    if output_config.build_requires:
+        postprocessors.append(BuildRequiresPostProcessor)
     for postprocessor in postprocessors:
         scan_depends.add(postprocessor.SCAN_DEPENDS)
 
