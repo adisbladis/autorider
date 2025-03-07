@@ -77,6 +77,8 @@
         };
       };
 
+      lib = import ./lib.nix { inherit lib pyproject-nix; };
+
       devShells.x86_64-linux = {
         default =
           let
