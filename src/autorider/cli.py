@@ -73,7 +73,7 @@ def main() -> None:
                 sonames.add(soname)
 
     # Lookup soname providers using nix-locate
-    so_providers = lookup_sonames(sonames)
+    so_providers = lookup_sonames(sonames, config.autorider.nix_locate_ignore)
 
     try:
         os.mkdir(output_path)

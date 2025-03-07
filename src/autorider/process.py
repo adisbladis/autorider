@@ -152,11 +152,15 @@ class BuildRequiresPostProcessor(PostProcessor):
         output["build-requires"] = list(build_requires)
 
 
-def lookup_sonames(sonames: Iterable[str]) -> dict[str, str]:
+def lookup_sonames(
+    sonames: Iterable[str],
+    ignore: list[str],
+) -> dict[str, str]:
     ret: dict[str, str] = {}
     with futures.ThreadPoolExecutor() as executor:
         lookup_futures = [
-            executor.submit(nix_locate_file, soname) for soname in sonames
+            executor.submit(nix_locate_file, soname, ignore=ignore)
+            for soname in sonames
         ]
         for soname, future in zip(sonames, lookup_futures):
             result = future.result()

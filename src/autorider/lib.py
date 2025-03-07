@@ -13,7 +13,7 @@ SO_PROVIDERS: dict[str, str] = {
 }
 
 
-def nix_locate_file(name: str) -> str | None:
+def nix_locate_file(name: str, ignore: list[str]) -> str | None:
     try:
         return SO_PROVIDERS[name]
     except KeyError:
@@ -38,6 +38,10 @@ def nix_locate_file(name: str) -> str | None:
     for line in proc.stdout.decode().split("\n"):
         if not line or PAREN_RE.match(line):
             continue
+
+        if any(line.startswith(prefix) for prefix in ignore):
+            continue
+
         return line
 
 

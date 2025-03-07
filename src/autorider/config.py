@@ -24,6 +24,9 @@ class AutoriderConfig(BaseModel):
     exclude: list[str] = Field(default_factory=list)
     outputs: OutputConfig = Field(default_factory=OutputConfig)
     packages: dict[str, PackageOutputConfig] = Field(default_factory=dict)
+    nix_locate_ignore: list[str] = Field(
+        alias="nix-locate-ignore", default_factory=lambda: []
+    )
 
 
 class Config(BaseModel):
