@@ -23,13 +23,15 @@ in
     .
   */
   mkOverlay =
+    path:
     {
-      dir,
       so-providers ? { },
     }:
     let
+      data = importJSON path;
+
       so-providers' =
-        mapAttrs (so: provider: filter isString (split "\\." provider)) (importJSON (dir + "/so-providers.json"))
+        mapAttrs (so: provider: filter isString (split "\\." provider)) (data.so-providers or { })
         // so-providers;
 
       packages = mapAttrs (
@@ -43,7 +45,7 @@ in
           else
             { }
         )
-      ) (importJSON (dir + /packages.json));
+      ) (data.packages or { });
 
     in
     final: prev:

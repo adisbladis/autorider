@@ -7,6 +7,7 @@ import json
 import os
 
 from autorider.config import Config
+from autorider.output import Output
 from autorider.scanners import ScanResult
 from autorider.manager import PackageManager
 from autorider.uv import Uv2nix
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 def _make_argparse():
     parser = argparse.ArgumentParser()
     _ = parser.add_argument(
-        "--output", "-o", help="Overlay output directory", default="autorider.nix"
+        "--output", "-o", help="Overlay output directory", default="autorider.json"
     )
     _ = parser.add_argument("--root", default=os.getcwd(), help="Path to project root")
     _ = parser.add_argument(
@@ -91,17 +92,13 @@ def main() -> None:
     logger.info("looking up soname providers")
     so_providers = lookup_sonames(sonames, config.autorider.nix_locate_ignore)
 
-    try:
-        os.mkdir(output_path)
-    except FileExistsError:
-        pass
-
-    with open(output_path.joinpath("packages.json"), "w") as fp:
-        json.dump(results, fp, indent=2)
-        _ = fp.write("\n")
-
-    with open(output_path.joinpath("so-providers.json"), "w") as fp:
-        json.dump(so_providers, fp, indent=2)
+    output: Output = { }
+    if results:
+        output["packages"] = results
+    if so_providers:
+        output["so-providers"] = so_providers
+    with open(output_path, "w") as fp:
+        json.dump(output, fp, indent=2)
         _ = fp.write("\n")
 
     print(f"Wrote {output_path}")

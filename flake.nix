@@ -67,15 +67,17 @@
 
     in
     {
-      packages.x86_64-linux = let
-        venv = pythonSet.mkVirtualEnv "autorider-env" workspace.deps.default;
-        inherit (pkgs.callPackages pyproject-nix.build.util { }) mkApplication;
-      in {
-        default = mkApplication {
-          inherit venv;
-          package = pythonSet.autorider;
+      packages.x86_64-linux =
+        let
+          venv = pythonSet.mkVirtualEnv "autorider-env" workspace.deps.default;
+          inherit (pkgs.callPackages pyproject-nix.build.util { }) mkApplication;
+        in
+        {
+          default = mkApplication {
+            inherit venv;
+            package = pythonSet.autorider;
+          };
         };
-      };
 
       lib = import ./lib.nix { inherit lib pyproject-nix; };
 

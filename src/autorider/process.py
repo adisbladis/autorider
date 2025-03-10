@@ -1,4 +1,4 @@
-from typing import TypedDict, NotRequired, override, ClassVar
+from typing import override, ClassVar
 from collections.abc import Iterable
 from concurrent import futures
 from fnmatch import fnmatch
@@ -11,6 +11,7 @@ from autorider.manylinux import MANYLINUX_LIBS
 from autorider.scanners import PackageScanner, ScanResult
 from autorider.manager import GENERATOR_T
 from autorider.config import Config
+from autorider.output import PackageOutput
 
 
 logger = logging.getLogger(__name__)
@@ -20,24 +21,6 @@ class ScanDepends(Enum):
     NONE = 0
     SDIST = 1
     WHEEL = 2
-
-
-PackageOutput = TypedDict(
-    "PackageOutput",
-    {
-        # Package version.
-        "version": NotRequired[str],
-        # List of natively linked .so files from manylinux wheel.
-        # Excluding self-references
-        "wheel-depends-so": NotRequired[list[str]],
-        # List of natively linked .so files from manylinux wheel
-        "sdist-depends-so": NotRequired[list[str]],
-        # Build systems as a list of PEP-508 strings
-        "build-systems": NotRequired[list[str]],
-        # Native build tooling (nativeBuildInputs)
-        "build-requires": NotRequired[list[str]],
-    },
-)
 
 
 class PostProcessor:
