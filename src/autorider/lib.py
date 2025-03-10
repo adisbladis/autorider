@@ -1,8 +1,4 @@
 import subprocess
-import re
-
-
-PAREN_RE = re.compile(r"\(.+\)")
 
 
 SO_PROVIDERS: dict[str, str] = {
@@ -23,6 +19,7 @@ def nix_locate_file(name: str, ignore: list[str]) -> str | None:
     proc = subprocess.run(
         [
             "nix-locate",
+            "--top-level",
             "--no-group",
             "--minimal",
             "-t",
@@ -36,7 +33,7 @@ def nix_locate_file(name: str, ignore: list[str]) -> str | None:
     )
 
     for line in proc.stdout.decode().split("\n"):
-        if not line or PAREN_RE.match(line):
+        if not line:
             continue
 
         if any(line.startswith(prefix) for prefix in ignore):
