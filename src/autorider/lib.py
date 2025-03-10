@@ -1,4 +1,8 @@
 import subprocess
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 SO_PROVIDERS: dict[str, str] = {
@@ -10,6 +14,8 @@ SO_PROVIDERS: dict[str, str] = {
 
 
 def nix_locate_file(name: str, ignore: list[str]) -> str | None:
+    logger.debug("running nix-locate for file '%s'", name)
+
     try:
         return SO_PROVIDERS[name]
     except KeyError:

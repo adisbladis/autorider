@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from concurrent import futures
 from fnmatch import fnmatch
 from enum import Enum
+import logging
 import re
 
 from autorider.lib import nix_locate_file
@@ -10,6 +11,9 @@ from autorider.manylinux import MANYLINUX_LIBS
 from autorider.scanners import PackageScanner, ScanResult
 from autorider.manager import GENERATOR_T
 from autorider.config import Config
+
+
+logger = logging.getLogger(__name__)
 
 
 class ScanDepends(Enum):
@@ -170,8 +174,10 @@ def lookup_sonames(
 
 
 def process_pkg(config: Config, pkg_scanner: PackageScanner):
+    name = pkg_scanner.name
+
     output_config = config.autorider.outputs
-    pkg_config = config.autorider.packages.get(pkg_scanner.name)
+    pkg_config = config.autorider.packages.get(name)
     if pkg_config:
         output_config = output_config.model_copy(
             update=pkg_config.model_dump(exclude_none=True)
@@ -191,6 +197,8 @@ def process_pkg(config: Config, pkg_scanner: PackageScanner):
     for postprocessor in postprocessors:
         scan_depends.add(postprocessor.SCAN_DEPENDS)
 
+    logger.debug("processing package '%s' with config '%s'", name, output_config)
+
     output: PackageOutput = {}
     if not postprocessors:
         return pkg_scanner, output
@@ -198,8 +206,14 @@ def process_pkg(config: Config, pkg_scanner: PackageScanner):
     if pkg_scanner.version:
         output["version"] = pkg_scanner.version
 
+    logger.info("scanning package '%s'", name)
     scan_result = pkg_scanner.scan()
     for postprocessor_cls in postprocessors:
+        logger.debug(
+            "processing output for '%s' with postprocessor '%s'",
+            name,
+            postprocessor_cls,
+        )
         postprocessor_cls(scan_result).run(output)
 
     return pkg_scanner, output

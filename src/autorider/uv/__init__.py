@@ -1,9 +1,13 @@
 from typing import override
 from pathlib import Path
+import logging
 
 from autorider.scanners import PackageScanner
 from autorider.uv import lock1
 from autorider.manager import GENERATOR_T, PackageManager
+
+
+logger = logging.getLogger(__name__)
 
 
 class UvPackageScanner(PackageScanner):
