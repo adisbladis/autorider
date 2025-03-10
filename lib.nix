@@ -13,6 +13,7 @@ let
     unique
     getAttrFromPath
     importJSON
+    optionalAttrs
     ;
   inherit (pyproject-nix.lib.pep508) parseString mkEnviron evalMarkers;
 in
@@ -30,30 +31,30 @@ in
     let
       data = importJSON path;
 
-      so-providers' =
-        mapAttrs (so: provider: filter isString (split "\\." provider)) (data.so-providers or { })
-        // so-providers;
-
       packages = mapAttrs (
         name: overrideMeta:
         overrideMeta
-        // (
-          if overrideMeta ? build-systems then
-            {
-              build-systems = map parseString overrideMeta.build-systems;
-            }
-          else
-            { }
-        )
+        // optionalAttrs (overrideMeta ? build-systems) {
+          build-systems = map parseString overrideMeta.build-systems;
+        }
       ) (data.packages or { });
 
     in
     final: prev:
     let
       inherit (prev) python;
+      inherit (final) pkgs;
       environ = mkEnviron python;
 
-      inherit (final) pkgs;
+      so-providers' =
+        (mapAttrs (
+          so: provider:
+          let
+            provider' = filter isString (split "\\." provider);
+          in
+          getAttrFromPath provider' pkgs
+        ) (data.so-providers or { }))
+        // so-providers;
 
       lookupSonames =
         sonames:
@@ -63,7 +64,7 @@ in
             let
               provider = so-providers'.${soname};
             in
-            if provider != null then [ (getAttrFromPath provider pkgs) ] else [ ]
+            if provider != null then [ provider ] else [ ]
           ) sonames
         );
 
