@@ -13,7 +13,7 @@ SO_PROVIDERS: dict[str, str] = {
 }
 
 
-def nix_locate_file(name: str, ignore: list[str]) -> str | None:
+def nix_locate_file(name: str, ignore: list[str] | None = None) -> str | None:
     logger.debug("running nix-locate for file '%s'", name)
 
     try:
@@ -42,7 +42,7 @@ def nix_locate_file(name: str, ignore: list[str]) -> str | None:
         if not line:
             continue
 
-        if any(line.startswith(prefix) for prefix in ignore):
+        if ignore and any(line.startswith(prefix) for prefix in ignore):
             continue
 
         return line
