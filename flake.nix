@@ -59,7 +59,7 @@
         }).overrideScope
           (
             lib.composeManyExtensions [
-              pyproject-build-systems.overlays.default
+              pyproject-build-systems.overlays.wheel
               overlay
               pyprojectOverrides
             ]
