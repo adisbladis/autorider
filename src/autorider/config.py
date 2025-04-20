@@ -16,7 +16,7 @@ class PackageOutputConfig(BaseModel):
     build_systems: bool | None = Field(alias="build-systems", default=None)
     wheel_depends_so: bool | None = Field(alias="wheel-depends-so", default=None)
     sdist_depends_so: bool | None = Field(alias="sdist-depends-so", default=None)
-    build_requires: bool | None = Field(alias="build-requires", default=True)
+    build_requires: bool | None = Field(alias="build-requires", default=None)
 
 
 class AutoriderConfig(BaseModel):
