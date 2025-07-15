@@ -53,7 +53,7 @@ class WheelDependsPostProcessor(PostProcessor):
                 - self.scan_result.wheel.native_provides  # Filter self references
                 - MANYLINUX_LIBS  # Manylinux libs are added as required by wheel file tags
             )
-            if not so.startswith("ld-linux-")
+            if not so.startswith("ld-linux")
         ]
 
         if not native_depends:
@@ -87,7 +87,7 @@ class SdistDependsPostProcessor(PostProcessor):
 
         native_depends: list[str] = []
         for so in self.scan_result.wheel.native_depends:
-            if so.startswith("ld-linux-"):
+            if so.startswith("ld-linux"):
                 continue
 
             m = re.match(r"(.+)-[0-9a-f]{8}(\.so.+)", so)
