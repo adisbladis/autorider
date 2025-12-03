@@ -4,8 +4,8 @@ from autorider.uv import lock1
 
 def scan_fixture(fixture: str) -> ScanResult:
     lock = lock1.loads(fixture)
-    assert len(lock["package"]) == 1
-    return lock1.scan_pkg(lock["package"][0])
+    assert len(lock.get("package", [])) == 1
+    return lock1.scan_pkg(lock.get("package", [])[0])
 
 
 def test_sdist_url():
@@ -22,8 +22,8 @@ def test_sdist_url():
         { url = "https://files.pythonhosted.org/packages/88/ef/eb23f262cca3c0c4eb7ab1933c3b1f03d021f2c48f54763065b6f0e321be/packaging-24.2-py3-none-any.whl", hash = "sha256:09abb1bccd265c01f4a3aa3f7a7db064b36514d2cba19a2f694fe6150451a759", size = 65451 },
     ]
     """)
-    assert scan_result.wheel == None
-    assert scan_result.sdist.build_systems == ["flit_core >=3.3"]
+    assert scan_result.wheel is None
+    assert scan_result.sdist is not None and scan_result.sdist.build_systems == ["flit_core >=3.3"]
 
 
 def test_sdist_path():
@@ -37,8 +37,8 @@ def test_sdist_path():
     source = { path = "./fixtures/attrs-23.1.0.tar.gz" }
     sdist = { hash = "sha256:6279836d581513a26f1bf235f9acd333bc9115683f14f7e8fae46c98fc50e015" }
     """)
-    assert scan_result.wheel == None
-    assert scan_result.sdist.build_systems == [
+    assert scan_result.wheel is None
+    assert scan_result.sdist is not None and scan_result.sdist.build_systems == [
         "hatchling",
         "hatch-vcs",
         "hatch-fancy-pypi-readme",
@@ -55,8 +55,8 @@ def test_git():
     version = "1.27.0"
     source = { git = "https://github.com/pypa/hatch.git?subdirectory=backend&rev=hatchling-v1.27.0#cbf6598e5cbce3ba9097023c5bf783001ebbcbcb" }
     """)
-    assert scan_result.wheel == None
-    assert scan_result.sdist.build_systems == ["setuptools"]
+    assert scan_result.wheel is None
+    assert scan_result.sdist is not None and scan_result.sdist.build_systems == ["setuptools"]
 
 
 def test_wheel():
@@ -70,8 +70,8 @@ def test_wheel():
         { url = "https://files.pythonhosted.org/packages/f0/eb/fcb708c7bf5056045e9e98f62b93bd7467eb718b0202e7698eb11d66416c/attrs-23.1.0-py3-none-any.whl", hash = "sha256:1f28b4522cdc2fb4256ac1a020c78acf9cba2c6b461ccd2c126f3aa8e8335d04", size = 61160 },
     ]
     """)
-    assert scan_result.wheel == None
-    assert scan_result.sdist == None
+    assert scan_result.wheel is None
+    assert scan_result.sdist is None
 
 
 def test_manylinux_wheel():
@@ -89,6 +89,7 @@ def test_manylinux_wheel():
     ]
     """)
 
+    assert scan_result.sdist is not None
     assert scan_result.sdist.build_systems == [
         "cffi; implementation_name == 'pypy'",
         "cython>=3.0.0; implementation_name != 'pypy'",
@@ -96,6 +97,7 @@ def test_manylinux_wheel():
         "scikit-build-core",
     ]
 
+    assert scan_result.wheel is not None
     assert scan_result.wheel.native_depends == {
         "libsodium-53576c4c.so.26.2.0",
         "libgcc_s.so.1",
