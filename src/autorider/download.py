@@ -1,4 +1,4 @@
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, urlunparse
 import subprocess
 import pathlib
 import json
@@ -55,19 +55,34 @@ class GitDownload:
         self.url = url
 
     def get(self):
+        # Split base url from fetchGit params
+        url_parsed = urlparse(self.url)
+        query = parse_qs(url_parsed.query)
+
+        fetchgit_args: dict[str, str] = {
+            "url": urlunparse(url_parsed._replace(fragment="", query="")),
+            "rev": url_parsed.fragment,
+        }
+
+        try:
+            refs = query["tag"]
+        except KeyError:
+            pass
+        else:
+            if len(refs) > 1:
+                raise ValueError("Number of refs too long")
+            fetchgit_args["ref"] = f"refs/tags/{refs[0]}"
+
         args = [
             "nix-instantiate",
             "--eval",
             "--json",
             "--expr",
-            "{ url }: builtins.fetchGit url",
+            "{ args }: builtins.fetchGit (builtins.fromJSON args)",
             "--argstr",
-            "url",
-            self.url,
+            "args",
+            json.dumps(fetchgit_args)
         ]
-
-        url_parsed = urlparse(self.url)
-        query = parse_qs(url_parsed.query)
 
         p = subprocess.run(args, stdout=subprocess.PIPE, check=True)
         result = json.loads(p.stdout)  # pyright: ignore[reportAny]
