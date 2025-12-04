@@ -30,6 +30,7 @@
 
   outputs =
     {
+      self,
       nixpkgs,
       uv2nix,
       pyproject-nix,
@@ -42,48 +43,40 @@
 
       workspace = uv2nix.lib.workspace.loadWorkspace { workspaceRoot = ./.; };
 
-      overlay = workspace.mkPyprojectOverlay {
-        sourcePreference = "wheel";
-      };
-
-      pyprojectOverrides = _final: _prev: {
-      };
+      self' = import ./default.nix { inherit pyproject-nix uv2nix pyproject-build-systems lib; };
 
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
-
-      python = pkgs.python3;
-
-      pythonSet =
-        (pkgs.callPackage pyproject-nix.build.packages {
-          inherit python;
-        }).overrideScope
-          (
-            lib.composeManyExtensions [
-              pyproject-build-systems.overlays.wheel
-              overlay
-              pyprojectOverrides
-            ]
-          );
-
     in
     {
-      packages.x86_64-linux =
-        let
-          venv = pythonSet.mkVirtualEnv "autorider-env" workspace.deps.default;
-          inherit (pkgs.callPackages pyproject-nix.build.util { }) mkApplication;
-        in
-        {
-          default = mkApplication {
-            inherit venv;
-            package = pythonSet.autorider;
-          };
+      packages.x86_64-linux = {
+        autorider = pkgs.callPackage self'.packages.autorider {
+          python = pkgs.python3;
         };
+        doc = pkgs.callPackage ./doc { inherit self; };
+      };
 
-      lib = import ./lib.nix { inherit lib pyproject-nix; };
+      inherit (self') lib;
 
       devShells.x86_64-linux = {
         default =
           let
+            python = pkgs.python3;
+
+            overlay = workspace.mkPyprojectOverlay {
+              sourcePreference = "wheel";
+            };
+
+            pythonSet =
+              (pkgs.callPackage pyproject-nix.build.packages {
+                inherit python;
+              }).overrideScope
+                (
+                  lib.composeManyExtensions [
+                    pyproject-build-systems.overlays.wheel
+                    overlay
+                  ]
+                );
+
             editableOverlay = workspace.mkEditablePyprojectOverlay {
               root = "$REPO_ROOT";
             };
@@ -95,10 +88,12 @@
               virtualenv
               pkgs.uv
               pkgs.nix-index
+              pkgs.mdbook
+              # pkgs.mdbook-open-on-gh
             ];
             env = {
               UV_NO_SYNC = "1";
-              UV_PYTHON = "${virtualenv}/bin/python";
+              UV_PYTHON = python.interpreter;
               UV_PYTHON_DOWNLOADS = "never";
               NIX_INDEX_DATABASE = pkgs.linkFarm "nix-index-database" {
                 files = nix-index-database.packages.x86_64-linux.nix-index-database;
