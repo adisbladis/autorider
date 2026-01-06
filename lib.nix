@@ -1,4 +1,4 @@
-{ pyproject-nix, lib }:
+{ pyproject-nix, lib, ... }:
 let
   inherit (builtins)
     mapAttrs
