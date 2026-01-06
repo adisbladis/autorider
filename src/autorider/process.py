@@ -227,7 +227,10 @@ def process_pkgs(config: Config, generator: GENERATOR_T):
     for name, outputs in ret.items():
         if isinstance(outputs, list) and len(outputs) == 1:
             output = outputs[0]
-            del output["version"]
+            try:
+                del output["version"]
+            except KeyError:
+                pass
             ret[name] = output
 
     return {k: v for k, v in ret.items() if v}
