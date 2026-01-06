@@ -25,7 +25,6 @@ def nix_locate_file(name: str, ignore: list[str] | None = None) -> str | None:
     proc = subprocess.run(
         [
             "nix-locate",
-            "--top-level",
             "--no-group",
             "--minimal",
             "-t",

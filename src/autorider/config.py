@@ -29,11 +29,15 @@ class AutoriderConfig(BaseModel):
     )
 
 
-class Config(BaseModel):
+class ToolConfig(BaseModel):
     autorider: AutoriderConfig = Field(default_factory=AutoriderConfig)
 
+
+class PyprojectConfig(BaseModel):
+    tool: ToolConfig = Field(default_factory=ToolConfig)
+
     @classmethod
-    def from_path(cls, path: Path) -> Config:
+    def from_path(cls, path: Path) -> PyprojectConfig:
         if path.exists():
             with open(path, "rb") as config_file:
                 return cls(**tomllib.load(config_file))

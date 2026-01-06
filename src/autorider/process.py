@@ -10,7 +10,7 @@ from autorider.lib import nix_locate_file
 from autorider.manylinux import MANYLINUX_LIBS
 from autorider.scanners import PackageScanner, ScanResult
 from autorider.manager import GENERATOR_T
-from autorider.config import Config
+from autorider.config import AutoriderConfig
 from autorider.output import PackageOutput
 
 
@@ -156,11 +156,11 @@ def lookup_sonames(
     return ret
 
 
-def process_pkg(config: Config, pkg_scanner: PackageScanner):
+def process_pkg(config: AutoriderConfig, pkg_scanner: PackageScanner):
     name = pkg_scanner.name
 
-    output_config = config.autorider.outputs
-    pkg_config = config.autorider.packages.get(name)
+    output_config = config.outputs
+    pkg_config = config.packages.get(name)
     if pkg_config:
         output_config = output_config.model_copy(
             update=pkg_config.model_dump(exclude_none=True)
@@ -202,7 +202,7 @@ def process_pkg(config: Config, pkg_scanner: PackageScanner):
     return pkg_scanner, output
 
 
-def process_pkgs(config: Config, generator: GENERATOR_T):
+def process_pkgs(config: AutoriderConfig, generator: GENERATOR_T):
     ret: dict[str, PackageOutput | list[PackageOutput]] = {}
 
     with futures.ThreadPoolExecutor() as executor:
@@ -211,9 +211,9 @@ def process_pkgs(config: Config, generator: GENERATOR_T):
             name = pkg_scanner.name
 
             # Include/exclude based on config patterns
-            if not any(fnmatch(name, pat) for pat in config.autorider.include):
+            if not any(fnmatch(name, pat) for pat in config.include):
                 continue
-            if any(fnmatch(name, pat) for pat in config.autorider.exclude):
+            if any(fnmatch(name, pat) for pat in config.exclude):
                 continue
 
             fut = executor.submit(process_pkg, config, pkg_scanner)

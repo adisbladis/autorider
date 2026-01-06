@@ -27,7 +27,7 @@ Each feature is opt-in while autorider is still experimental.
 
 - `pyproject.toml`:
 ```toml
-[autorider.outputs]
+[tool.autorider.outputs]
 # Extract PEP-517 build systems from sdist
 build-systems = True
 
@@ -47,7 +47,7 @@ build-requires = True
 
 - `pyproject.toml`:
 ```toml
-[autorider]
+[tool.autorider]
 nix-locate-ignore = [
   "pyfa",
   "hyperhdr",

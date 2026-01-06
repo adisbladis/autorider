@@ -6,7 +6,7 @@ import logging
 import json
 import os
 
-from autorider.config import Config
+from autorider.config import PyprojectConfig
 from autorider.output import Output
 from autorider.scanners import ScanResult
 from autorider.manager import PackageManager
@@ -57,7 +57,8 @@ def main() -> None:
     )
 
     logger.info("loading config from path '%s'", config_path)
-    config = Config.from_path(config_path)
+    pyproject = PyprojectConfig.from_path(config_path)
+    config = pyproject.tool.autorider
 
     logger.info("initializing package manager %s", subcommand)
     manager: PackageManager
@@ -90,7 +91,7 @@ def main() -> None:
 
     # Lookup soname providers using nix-locate
     logger.info("looking up soname providers")
-    so_providers = lookup_sonames(sonames, config.autorider.nix_locate_ignore)
+    so_providers = lookup_sonames(sonames, config.nix_locate_ignore)
 
     output: Output = { }
     if results:
