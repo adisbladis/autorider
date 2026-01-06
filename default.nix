@@ -24,7 +24,7 @@ in
           }).overrideScope
             (
               lib.composeManyExtensions [
-                pyproject-build-systems.overlays.wheel
+                (pyproject-build-systems.overlays.wheel or pyproject-build-systems.wheel)
                 overlay
               ]
             );
